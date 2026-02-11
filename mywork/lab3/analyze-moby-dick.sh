@@ -12,9 +12,15 @@ else
 	OUTPUT=$2
 fi
 
+if [[ -f $OUTPUT ]];
+then
+	echo "Output File already exists: $OUTPUT"
+	exit 1
+fi
+
 export OUTPUT
 echo "$OUTPUT <-- output file"
 
-export NUM_LINES=$(grep -o "$SEARCH_PATTERN" ./mobydick.txt | wc -l)
+export NUM_LINES=$(grep -oi "$SEARCH_PATTERN" ./mobydick.txt | wc -l)
 
 echo "The search pattern \"$SEARCH_PATTERN\" was found $NUM_LINES time(s)." > "$OUTPUT"

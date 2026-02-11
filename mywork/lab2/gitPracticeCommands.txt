@@ -1,0 +1,11 @@
+git add .
+git commit -m ""
+git push origin main
+
+
+git remote -v
+git remote remove origin/upstream
+git remote add origin/upstream <URL>
+
+git status - see things waiting to be pushed
+git log - see commit history

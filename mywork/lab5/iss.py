@@ -1,12 +1,19 @@
-#!/usr/local/python/current/bin/python
-import sys
+#!/Users/haydenrobinette/miniforge3/envs/ds2002/bin/python3
 import os
 import json
+import sys
 import pandas as pd
 import logging
 import requests
 import time
+import mysql.connector
 
+
+# db config stuff
+DBHOST = os.environ.get('DBHOST')
+DBUSER = os.environ.get('DBUSER')
+DBPASS = os.environ.get('DBPASS')
+DB = "iss"
 
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 console_handler = logging.StreamHandler()
@@ -16,15 +23,43 @@ logging.basicConfig(level=logging.INFO, handlers=[console_handler])
 URL = "http://api.open-notify.org/iss-now.json"
 jsonFile = "TEMP_JSON_DUMP"
 
-def parse_args():
-    """ Look through arguments for provided csv file, log an error otherwise """
-    try:
-        outputCSV = sys.argv[1]
-    except IndexError:
-        logging.error(f"Usage: python {sys.argv[0]} <csv_file>")
-        sys.exit(1)
-    return outputCSV
 
+def get_connection():
+    """Create and return a database connection."""
+    return mysql.connector.connect(host=DBHOST, user=DBUSER, password=DBPASS, database=DB)
+
+
+def register_reporter(table='reporters', reporter_id='xyb9vz', reporter_name='Hayden Robinette'):
+    """Register reporter in DB if not already present."""
+    logging.info(f"Checking if reporter '{reporter_id}' exists in {table}...")
+    db = None
+    cursor = None
+    try:
+        db = get_connection()
+        cursor = db.cursor()
+
+
+        select_query = f"SELECT * FROM {table} WHERE reporter_id = %s"
+        recordData = (reporter_id,)
+        cursor.execute(select_query, recordData)
+        results = cursor.fetchall()
+
+        if len(results) == 0:
+            insert_query = f"INSERT INTO {table} (reporter_id, reporter_name) VALUES (%s, %s)"
+            recordData = (reporter_id, reporter_name)
+            cursor.execute(insert_query, recordData)
+            db.commit()
+            logging.info(f"Reporter '{reporter_id}' registered successfully.")
+        else:
+            logging.info(f"Reporter '{reporter_id}' already exists")
+
+
+
+    except Exception as e:
+        logging.error(f"Error in register_reporter: {e}")
+    finally:
+        if cursor: cursor.close()
+        if db: db.close()
 
 
 
@@ -50,7 +85,7 @@ def extract(url):
 
 
 
-def transform(data, selected=["timestamp", "latitude", "longitude"]):
+def transform(data, selected=["timestamp", "latitude", "longitude", "message"]):
     """Transform the JSON data into a clean single-row DataFrame."""
 
 
@@ -74,20 +109,37 @@ def transform(data, selected=["timestamp", "latitude", "longitude"]):
 
 
 
-def load(df, csvFile):
-    """
-    Load: Save transformed data to CSV and display summary.
-          Additionally, add the data to the existing CSV if it is already there
-    """
-    if os.path.exists(csvFile):
-        current = pd.read_csv(csvFile)
-        combine = pd.concat([current, df], ignore_index=True)
-        combine.to_csv(csvFile, index=False)
-        logging.info(f"Appended record ({len(combine)} total rows) to {csvFile}")
+def load(df, reporter_id='xyb9vz'):
+    """ Load: Save transformed data to database """
+    logging.info(f"Loading data into the database")
+    db = None
+    cursor = None
+    try:
+        db = get_connection()
+        cursor = db.cursor()
 
-    else:
-        df.to_csv(csvFile, index=False)
-        logging.info(f"Loaded transformed data (saved to {csvFile})")
+        insertQuery = "INSERT INTO locations (message, latitude, longitude, timestamp, reporter_id) VALUES (%s, %s, %s, %s, %s)"
+        for i, row in df.iterrows():
+            recordData = (
+                row["message"],
+                row["latitude"],
+                row["longitude"],
+                row["timestamp"],
+                reporter_id
+            )
+            cursor.execute(insertQuery, recordData)
+        
+        db.commit()
+        logging.info(f"Inserted {len(df)} record(s) into locations.")
+
+
+
+    except Exception as e:
+        logging.error(f"Error in loading data into database: {e}")
+    finally:
+        if cursor: cursor.close()
+        if db: db.close()
+
 
 
 
@@ -98,9 +150,7 @@ def main():
     """Run the complete ETL pipeline."""
 
     logging.info("ISS Pipeline Lab4")
-
-    
-    csvFile = parse_args()
+    register_reporter(reporter_id='xyb9vz', reporter_name='Hayden Robinette')
 
     data = extract(URL)
     if data is None:
@@ -108,7 +158,7 @@ def main():
         sys.exit(1)
 
     df = transform(data)
-    load(df, csvFile)
+    load(df, 'xyb9vz')
     logging.info(f"Processed {len(df)} records")
 
 

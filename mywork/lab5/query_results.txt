@@ -1,0 +1,7 @@
+name	owl_species	owl_age	tree_species	yearsWithOwl	tree_age
+Milan	Red Owl	7	OAK	6	758
+Bob	Red Owl	8	OAK	5	815
+Alex	Blue Owl	5	OAK	5	237
+Science	Yellow Owl	14	OAK	5	719
+Peter	Blue Owl	13	FIR	4	329
+Montana	Yellow Owl	9	FIR	4	813

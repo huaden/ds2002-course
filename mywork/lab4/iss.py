@@ -1,4 +1,4 @@
-#!/usr/local/python/current/bin/python
+#!/Users/haydenrobinette/miniforge3/envs/ds2002/bin/python3
 import sys
 import os
 import json

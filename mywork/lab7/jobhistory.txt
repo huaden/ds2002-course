@@ -1,0 +1,16 @@
+JobID           JobName  Partition    Account  AllocCPUS      State ExitCode 
+------------ ---------- ---------- ---------- ---------- ---------- -------- 
+10340305     ood_vscode interacti+     ds2002          2    RUNNING      0:0 
+10340305.ba+      batch                ds2002          2    RUNNING      0:0 
+10340449     ds2002_la+ standard-+     ds2002          1  COMPLETED      0:0 
+10340449.ba+      batch                ds2002          1  COMPLETED      0:0 
+10341139_1   ds2002_la+ standard-+     ds2002          1  COMPLETED      0:0 
+10341139_1.+      batch                ds2002          1  COMPLETED      0:0 
+10341139_2   ds2002_la+ standard-+     ds2002          1  COMPLETED      0:0 
+10341139_2.+      batch                ds2002          1  COMPLETED      0:0 
+10341139_3   ds2002_la+ standard-+     ds2002          1  COMPLETED      0:0 
+10341139_3.+      batch                ds2002          1  COMPLETED      0:0 
+10341139_4   ds2002_la+ standard-+     ds2002          1  COMPLETED      0:0 
+10341139_4.+      batch                ds2002          1  COMPLETED      0:0 
+10341139_5   ds2002_la+ standard-+     ds2002          1  COMPLETED      0:0 
+10341139_5.+      batch                ds2002          1  COMPLETED      0:0 
